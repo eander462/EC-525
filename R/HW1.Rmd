@@ -1,0 +1,135 @@
+---
+title: "HW 1"
+author: "Erik Andersen"
+date: '2022-04-27'
+header-includes: \usepackage{setspace}\doublespacing
+output:
+  html_document: default
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      error = FALSE,
+                      message = FALSE,
+                      cache = TRUE)
+```
+
+```{r}
+# Load packages
+
+pacman::p_load(tidyverse, broom, haven, data.table, here, magrittr, fixest, stargazer, DT)
+
+# Load data
+
+ohp_df = read_dta(here('data', 'ohp.dta'))
+
+# Set as a data.table for quick manipulations
+
+setDT(ohp_df)
+
+```
+
+
+### Question 1
+
+There is a subtle difference between the two variables. The treatment reports whether the person was a winner of the OHP lottery, while the survey variable reports if the person enrolled in the medicaid program. This may sound the same since the OHP lottery gave each winner the chance to enroll for the closed medicaid program. The difference is the compliance rate. Not everyone who wins the lottery will choose to join the medicaid program, so the two variables will have different values.
+
+Treatment is the treatment variable instead of the survey variable because it is a random selection while who joins medicaid is not. It is reasonable to assume that there is some difference between the people who choose to join medicaid after winning the lottery and those who do not, so there is a selection bias between the two groups. If we used the survey variable as the treatment variable, then our results would be biased by the selection bias. But if we use the treatment variable, then the two groups have been selected randomly, so there should not be any selection bias between them. 
+
+### Question 2
+
+The variables I chose to test are gender, age, education, the percentage of patients diagnosed with hypertension before the lottery, the number of people diagnosed with diabetes before the lottery, and the number of people diagnosed with depression pre lottery. It was important to choose variables that are determined before the treatment so we don't introduce bias. 
+
+```{r}
+# Get the means of the relevant variables
+
+ohp_means = ohp_df[treatment == 0, 
+       lapply(.SD, mean, na.rm = T),
+       .SDcols = c("gender_inp", 
+                   'age_inp',
+                   'edu_inp',
+                   'hbp_dx_pre_lottery',
+                   'dia_dx_pre_lottery',
+                   'dep_dx_pre_lottery')]
+
+# Table of means
+
+stargazer(ohp_means, type = 'text', summary.stat = 'mean', title = 'Control Group Means', covariate.labels = c('Gender', 'Age', 'Education','High Blood Pressure pre Randomization', 'Diabetes pre Randomization', 'Depression pre Randomzation'))
+
+```
+
+### Question 3
+
+```{r}
+# Run all the balance regressions
+
+balance_reg1 = ohp_df %>% lm(gender_inp ~ treatment,.) |> tidy()
+balance_reg2 = ohp_df %>% lm(age_inp ~ treatment,.) |> tidy()
+balance_reg3 = ohp_df %>% lm(edu_inp ~ treatment,.) |> tidy()
+balance_reg4 = ohp_df %>% lm(hbp_dx_pre_lottery ~ treatment,.) |> tidy()
+balance_reg5 = ohp_df %>% lm(dia_dx_pre_lottery ~ treatment,.) |> tidy()
+balance_reg6 = ohp_df %>% lm(dep_dx_pre_lottery ~ treatment,.) |> tidy()
+
+# Vector of differences from regression
+
+diffs = c(balance_reg1$estimate[2], balance_reg2$estimate[2], balance_reg3$estimate[2], balance_reg4$estimate[2], balance_reg5$estimate[2], balance_reg6$estimate[2])
+
+# Vector of standard errors
+
+se = c(balance_reg1$std.error[2], balance_reg2$std.error[2], balance_reg3$std.error[2], balance_reg4$std.error[2], balance_reg5$std.error[2], balance_reg6$std.error[2])
+
+# Vector of means 
+
+means = c(ohp_means$gender_inp[1], ohp_means$age_inp[1], ohp_means$edu_inp[1], ohp_means$hbp_dx_pre_lottery[1], ohp_means$dia_dx_pre_lottery[1])
+
+# Data frame of characteristics, means, and differences
+
+balance_table = data.table(Characteristics = c("gender_inp", "age_inp", "edu_inp", "hbp_dx_pre_lottery", "dia_dx_pre_lottery", 'dep_dx_pre_lottery'), Control_Mean = means, `Treatment-Control_Difference` = diffs, Standard_Errors = se)
+
+# Printed table
+
+datatable(balance_table, class = 'cell-border stripe') |> formatRound(c("Control_Mean", "Treatment-Control_Difference", "Standard_Errors"), digits = 4)
+```
+
+### Question 4
+
+The balance table is consistent with random assignment into treatment and control groups. What we are looking for in the balance table to confirm this is that there is no statistical difference between the control mean and the treated mean for any of the characteristics. Another consideration (that we don't run into here) is that a difference could be statistically insignificant, but still of a large magnitude. This would be a concerning result despite the lack of precision estimating it. 
+
+In our case, we can see from the table that none of the differences between the control and treatment means (right column) are significant. For gender, we see that in the control group, 57% of participants are female, and that is only -0.0062 different than the treated group gender composition. The standard error is 0.0091 which we can easily see makes the estimate non-significant. Also important, the -0.0062 estimate is two orders of magnitude smaller than the control mean, so even if the difference is estimated imprecisely, we are not concerned that there is a meaningful difference between the groups. The same analysis holds true for each variable I chose, so we can conclude that there is strong evidence the random assignment was successful. 
+
+### Question 5
+
+```{r}
+compliance_reg = ohp_df %>% lm(ohp_all_ever_survey ~ treatment,.) |> tidy()
+
+compliance_reg
+```
+
+The above table shows us that if a person is enrolled in the treatment group, t
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
