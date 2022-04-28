@@ -2,14 +2,15 @@
 title: "HW 1"
 author: "Erik Andersen"
 date: '2022-04-27'
-header-includes: \usepackage{setspace}\doublespacing
 output:
-  html_document: 
+  pdf_document:
+    toc: yes
+  html_document:
     keep_md: yes
-    toc: true
-    toc_float: true
-
-
+    toc: yes
+    toc_float: yes
+header-includes: \usepackage{setspace}\doublespacing
+always_allow_html: true
 ---
 
 ### Setup
@@ -95,9 +96,14 @@ means = c(ohp_means$gender_inp[1], ohp_means$age_inp[1], ohp_means$edu_inp[1], o
 
 balance_table = data.table(Characteristics = c("gender_inp", "age_inp", "edu_inp", "hbp_dx_pre_lottery", "dia_dx_pre_lottery", 'dep_dx_pre_lottery'), Control_Mean = means, `Treatment-Control_Difference` = diffs, Standard_Errors = se)
 
-# Printed table
+# Print table for pdf
 
-datatable(balance_table, class = 'cell-border stripe') |> formatRound(c("Control_Mean", "Treatment-Control_Difference", "Standard_Errors"), digits = 4)
+balance_table
+
+# Printed table. This works for html, but not pdf output. Its a better table, so I'm emailing you the html version which works a lot better overall anyways
+
+# datatable(balance_table, class = 'cell-border stripe') |> formatRound(c("Control_Mean", "Treatment-Control_Difference", "Standard_Errors"), digits = 4)
+
 ```
 
 ### Question 4
