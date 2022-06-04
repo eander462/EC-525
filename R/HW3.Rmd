@@ -1,0 +1,199 @@
+---
+title: "HW3"
+author: "Erik Andersen"
+date: "`r Sys.Date()`"
+output:
+  pdf_document:
+    toc: yes
+  html_document:
+    keep_md: yes
+    toc: yes
+    toc_float: yes
+    toc_depth: 5
+always_allow_html: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      error = FALSE,
+                      message = FALSE,
+                      cache = TRUE,
+                      warning = FALSE)
+```
+
+```{r, include=FALSE}
+# Load packages
+
+pacman::p_load(tidyverse, broom, haven, here, magrittr, rdrobust, rddtools, stargazer)
+
+# Load data
+
+nbp = read_dta(here("data", "nbp.dta"))
+
+# Set default theme
+
+theme_set(cowplot::theme_cowplot())
+```
+
+### Question 1
+
+#### a
+
+If the variable nbp is 1, that means that the state in question was regulated by the $NO_x$ budget trading program. This was a cap-and-trade system to regulate the emissions of nitrogen oxides. 
+
+#### b
+
+If the variable summer is 1, that indicates that the observation occurred during the summer. There is seasonal variation in emissions, which this variable helps to capture. 
+
+#### c
+
+If the variable post is 1, the year the observation was taken was after 2003. 2003 was the year the NBP program went into effect, so this variable captures the cutoff point for the diff-in-diff estimator. 
+
+### Question 2
+
+```{r}
+# Compute the year over year averages for summer
+
+nbp_summer = 
+  nbp |> 
+  filter(nbp == 1 & summer == 1) |>
+  group_by(year) |> 
+  summarise(nox_emit = mean(nox_emit),
+            summer = "Summer Months") 
+
+# Compute the year over year emissions averages for winter
+
+nbp_winter = 
+  nbp |> 
+  filter(nbp == 1 & summer == 0) |>
+  group_by(year) |> 
+  summarise(nox_emit = mean(nox_emit),
+            summer = "Winter Months") 
+
+# Combine the data sets
+
+nox_emit_df = bind_rows(nbp_summer, nbp_winter)
+
+# Fix the row types
+
+nox_emit_df %<>% mutate(summer = as.factor(summer))
+
+# Make the graph
+
+nox_emit_df |> 
+  ggplot(aes(x = year, y = nox_emit, color = summer, linetype = summer)) + 
+  geom_line(size = 1.25) + 
+  geom_point(aes(shape = summer), size = 3) + 
+  geom_vline(xintercept = 2002, alpha = 0.7) + 
+  scale_x_continuous(breaks = scales::breaks_pretty(n = 10)) + 
+  scale_color_manual(values = c("#4444e2", "#0000ff")) + 
+  ylim(0.35, 1.6) + 
+  labs(x = NULL,
+       y = NULL, 
+       title = "(A) States Participating in NBP") + 
+  theme(legend.position = 'bottom',
+        legend.box.background = element_rect(color = 'black'),
+        legend.title = element_blank())
+
+```
+
+
+### Question 5
+
+```{r}
+# Compute the year over year averages for summer and no nbp
+
+no_nbp_summer = 
+  nbp |> 
+  filter(nbp == 0 & summer == 1) |>
+  group_by(year) |> 
+  summarise(nox_emit = mean(nox_emit),
+            summer = "Summer Months") 
+
+# Compute the year over year emissions averages for winter and no nbp
+
+no_nbp_winter = 
+  nbp |> 
+  filter(nbp == 0 & summer == 0) |>
+  group_by(year) |> 
+  summarise(nox_emit = mean(nox_emit),
+            summer = "Winter Months") 
+
+# Combine the data sets
+
+no_nox_emit_df = bind_rows(no_nbp_summer, no_nbp_winter)
+
+# Make the graph
+
+no_nox_emit_df |> 
+  ggplot(aes(x = year, y = nox_emit, color = summer, linetype = summer)) + 
+  geom_line(size = 1.25) + 
+  geom_point(aes(shape = summer), size = 3) + 
+  scale_x_continuous(breaks = scales::breaks_pretty(n = 10)) + 
+  scale_color_manual(values = c("#4444e2", "#0000ff")) + 
+  ylim(0.35, 1.6) +
+  labs(x = NULL,
+       y = NULL, 
+       title = "(B) States Not Participating in NBP") + 
+  theme(legend.position = 'bottom',
+        legend.box.background = element_rect(color = 'black'),
+        legend.title = element_blank())
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
