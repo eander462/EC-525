@@ -19,6 +19,8 @@ always_allow_html: true
 
 ### Question 1
 
+The NBP program was a cap-and-trade system for emissions from generators and industrial boilers in some US states between 2003 and 2008. The goal of the program was the decrease ozone emissions. Since ozone peeks in the summer, the program saw the greatest decrease in emissions during the summer which the analysis shows. 
+
 #### a
 
 If the variable nbp is 1, that means that the state in question was regulated by the $NO_x$ budget trading program. This was a cap-and-trade system to regulate the emissions of nitrogen oxides. 
@@ -84,7 +86,7 @@ nox_emit_df |>
 
 ### Question 3
 
-The parallel trends assumption is that in the absence of the treatment, both groups would have had the same trend. In this case, the treated group are the summer months where the NBP program had its effect. For the parallel trends assumption to hold, we assume that if the NBP program hadn't been instituted in 2002, the summer months would have the same trend the winter months had after 2002. 
+The parallel trends assumption is that in the absence of the treatment, both groups would have had the same trend. In this case, the treated group are the summer months where the NBP program had its effect. For the parallel trends assumption to hold, we assume that if the NBP program hadn't been instituted in 2002, the summer months would have the same trend in emissions the winter months had. 
 
 Based on the graph, it looks likely that the parallel trends assumption would hold. To see this, we look at the time period before 2002. In that period, the summer and winter months have almost identical trends. It seems unlikely that they would randomly break that trend in the absence of the program. We can never directly test the parallel trends assumption, but in this case it looks likely to hold. 
 
@@ -107,32 +109,32 @@ nbp_reg =
 
 # Report the results
 
-stargazer(nbp_reg, type = 'text', keep.stat = c("N", "rsq"), style = 'qje', dep.var.labels = "NOx Emissions", covariate.labels = c("Summer", "Post", "Summer * Post"))
+stargazer(nbp_reg, type = 'text', keep.stat = c("N", "rsq"), style = 'qje', dep.var.labels = "NOx Emissions", covariate.labels = c("Summer", "Post", "Summer * Post (τ)"))
 ```
 
 ```
 ## 
-## ====================================================
-##                           NOx Emissions             
-## ----------------------------------------------------
-## Summer                        0.034                 
-##                              (0.054)                
-##                                                     
-## Post                        -0.223***               
-##                              (0.057)                
-##                                                     
-## Summer * Post               -0.373***               
-##                              (0.080)                
-##                                                     
-## Constant                     1.024***               
-##                              (0.038)                
-##                                                     
-## N                             26,070                
-## R2                            0.005                 
-## ====================================================
-## Notes:        ***Significant at the 1 percent level.
-##                **Significant at the 5 percent level.
-##                *Significant at the 10 percent level.
+## ========================================================
+##                               NOx Emissions             
+## --------------------------------------------------------
+## Summer                            0.034                 
+##                                  (0.054)                
+##                                                         
+## Post                            -0.223***               
+##                                  (0.057)                
+##                                                         
+## Summer * Post (τ)               -0.373***               
+##                                  (0.080)                
+##                                                         
+## Constant                         1.024***               
+##                                  (0.038)                
+##                                                         
+## N                                 26,070                
+## R2                                0.005                 
+## ========================================================
+## Notes:            ***Significant at the 1 percent level.
+##                    **Significant at the 5 percent level.
+##                    *Significant at the 10 percent level.
 ```
 
 This $\tau$ coefficient tells us that after the NBP program began, the gap between $NO_x$ emissions in summer versus winter months was 0.373 lower than before the program began.  
@@ -209,32 +211,32 @@ no_nbp_reg =
 
 # Report the results
 
-stargazer(no_nbp_reg, type = 'text', keep.stat = c("N", "rsq"), style = 'qje', dep.var.labels = "NOx Emissions", covariate.labels = c("Summer", "Post", "Summer * Post"))
+stargazer(no_nbp_reg, type = 'text', keep.stat = c("N", "rsq"), style = 'qje', dep.var.labels = "NOx Emissions", covariate.labels = c("Summer", "Post", "Summer * Post (τ)"))
 ```
 
 ```
 ## 
-## ====================================================
-##                           NOx Emissions             
-## ----------------------------------------------------
-## Summer                       0.084***               
-##                              (0.033)                
-##                                                     
-## Post                        -0.102***               
-##                              (0.034)                
-##                                                     
-## Summer * Post                 -0.042                
-##                              (0.048)                
-##                                                     
-## Constant                     0.502***               
-##                              (0.023)                
-##                                                     
-## N                             29,788                
-## R2                            0.001                 
-## ====================================================
-## Notes:        ***Significant at the 1 percent level.
-##                **Significant at the 5 percent level.
-##                *Significant at the 10 percent level.
+## ========================================================
+##                               NOx Emissions             
+## --------------------------------------------------------
+## Summer                           0.084***               
+##                                  (0.033)                
+##                                                         
+## Post                            -0.102***               
+##                                  (0.034)                
+##                                                         
+## Summer * Post (τ)                 -0.042                
+##                                  (0.048)                
+##                                                         
+## Constant                         0.502***               
+##                                  (0.023)                
+##                                                         
+## N                                 29,788                
+## R2                                0.001                 
+## ========================================================
+## Notes:            ***Significant at the 1 percent level.
+##                    **Significant at the 5 percent level.
+##                    *Significant at the 10 percent level.
 ```
 
 This $\tau$ coefficient tells us that after the NBP program began, the gap between $NO_x$ emissions in summer versus winter months was not statistically different than before the program began.  
@@ -243,11 +245,7 @@ This $\tau$ coefficient tells us that after the NBP program began, the gap betwe
 
 In this triple difference regression, we will estimate the following equation:
 
-$NO_x = \beta_0 + \beta_1*Summer + \beta_2*Post + beta_3*Treated + $
-
-$\beta_4*Summer*Post + \beta_5*Summer*Treated + \beta_6*Post*Treated + $ 
-
-$\tau*Summer*Post*Treated$
+$NO_x = \beta_0 + \beta_1*Summer + \beta_2*Post + beta_3*Treated + \beta_4*Summer*Post + \beta_5*Summer*Treated + \beta_6*Post*Treated + \tau*Summer*Post*Treated$
 
 This regression includes the full data set since this time we are controlling for if a state was in the NBP program or not instead of filtering. 
 
@@ -259,53 +257,53 @@ triple_diff_reg = nbp %>% lm(nox_emit ~ nbp*summer*post,.)
 
 # Report the results
 
-stargazer(triple_diff_reg, type = 'text', keep.stat = c("N", "rsq"), style = 'qje', dep.var.labels = "NOx Emissions", covariate.labels = c("Treated", "Summer", "Post", "Treated * Summer", "Treated * Post", "Summer * Post", "Treated * Summer * Post"))
+stargazer(triple_diff_reg, type = 'text', keep.stat = c("N", "rsq"), style = 'qje', dep.var.labels = "NOx Emissions", covariate.labels = c("Treated", "Summer", "Post", "Treated * Summer", "Treated * Post", "Summer * Post", "Treated * Summer * Post (τ)"))
 ```
 
 ```
 ## 
-## ==============================================================
-##                                     NOx Emissions             
-## --------------------------------------------------------------
-## Treated                                0.522***               
-##                                        (0.043)                
-##                                                               
-## Summer                                 0.084**                
-##                                        (0.042)                
-##                                                               
-## Post                                   -0.102**               
-##                                        (0.044)                
-##                                                               
-## Treated * Summer                        -0.050                
-##                                        (0.062)                
-##                                                               
-## Treated * Post                         -0.121*                
-##                                        (0.065)                
-##                                                               
-## Summer * Post                           -0.042                
-##                                        (0.062)                
-##                                                               
-## Treated * Summer * Post               -0.331***               
-##                                        (0.091)                
-##                                                               
-## Constant                               0.502***               
-##                                        (0.030)                
-##                                                               
-## N                                       55,858                
-## R2                                      0.009                 
-## ==============================================================
-## Notes:                  ***Significant at the 1 percent level.
-##                          **Significant at the 5 percent level.
-##                          *Significant at the 10 percent level.
+## ==================================================================
+##                                         NOx Emissions             
+## ------------------------------------------------------------------
+## Treated                                    0.522***               
+##                                            (0.043)                
+##                                                                   
+## Summer                                     0.084**                
+##                                            (0.042)                
+##                                                                   
+## Post                                       -0.102**               
+##                                            (0.044)                
+##                                                                   
+## Treated * Summer                            -0.050                
+##                                            (0.062)                
+##                                                                   
+## Treated * Post                             -0.121*                
+##                                            (0.065)                
+##                                                                   
+## Summer * Post                               -0.042                
+##                                            (0.062)                
+##                                                                   
+## Treated * Summer * Post (τ)               -0.331***               
+##                                            (0.091)                
+##                                                                   
+## Constant                                   0.502***               
+##                                            (0.030)                
+##                                                                   
+## N                                           55,858                
+## R2                                          0.009                 
+## ==================================================================
+## Notes:                      ***Significant at the 1 percent level.
+##                              **Significant at the 5 percent level.
+##                              *Significant at the 10 percent level.
 ```
 
 The $\tau$ coefficient here is just the difference between the two $\tau$'s from questions 4 and 7. The triple difference estimate is estimating the difference between how the trend changes between the participating and non-participating states which is quite a mouthful to state. Luckily, in question 4, we estimated how the trend changed in participating states, and in question 7 we estimated it for non-participating states. So, the triple difference estimator is just the difference between those.
 
 In question 4, we got that $\tau = -0.373$. In question 7, we got $\tau = -0.042$. $-0.373 - -0.042 = -0.331$, which is exactly what we got in the triple difference regression. 
 
+### Question 9
 
-
-
+Based on my analysis, the NBP program was a success, reducing $NO_x$ emissions by 1.865 million tons from 2003 to 2007. I first find that states which participated in the NBP program saw their $NO_x$ emissions significantly in the summer over the winter months. Using a placebo of the states who didn't participate in the program, I show that non-participating states saw no commensurate decrease in their emissions, which strengthens the case for the NBP program causing the decrease in emissions. Finally, I show with a triple difference estimate that there is a statistically significant difference in emissions trends between summer and winter across participating and non-participating states. The triple difference design gives confidence that this estimate is truly causal. I conclude that the NBL program was highly successful in reducing $NO_x$ emissions. 
 
 
 
